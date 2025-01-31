@@ -68,18 +68,18 @@ mode = args.pao_hotspot_treatment
 if np.isin([mode], ['no_mask', 'mask_and_scramble', 'scramble_and_mask_with_candidate_sources', 'scramble_and_mask_without_candidate_sources']):
     print("These trials will be produced for this case: ", mode)
 else:
-    raise("The pao_hotspot_treatment you specified is not defined! Try checking for typos and reading the docstrings :))")
+    print("The pao_hotspot_treatment you specified is not defined! Try checking for typos and reading the docstrings :))")
 
 #apply masks
 if args.mask_declination:
     print('Removing the sources that are not visible by PAO...')
-    mask = sources.DEC_deg.values < 44.8 # maximum declination visible by PAO when including also inclined events
+    mask = sources["DEC_deg"] < 44.8 # maximum declination visible by PAO when including also inclined events
     sources = sources[mask]
 
 if args.mask_distance:
     D_cut = 50
     print(f"Removing the sources more than {D_cut} Mpc away...")
-    mask = sources.D.values < D_cut # Mpc
+    mask = sources["D"] < D_cut # Mpc
     sources = sources[mask]
 
 #now the scrambling 

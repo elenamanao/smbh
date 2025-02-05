@@ -16,15 +16,14 @@ def GreatCircleDistance(ra_1, dec_1, ra_2, dec_2, unit="rad"):
     ) ** 2.0
     return 2.0 * np.arcsin(np.sqrt(x))
 
-def fraction_of_events_singlesource(ra_src, dec_src, data_ra, data_dec, search_radius, n_sources):
+def fraction_of_events_singlesource(ra_src, dec_src, data_ra, data_dec, search_radius):
     count = 0
     for ra_evt, dec_evt in zip(data_ra, data_dec):
-        if GreatCircleDistance(ra_src, dec_src, ra_evt, dec_evt, unit = 'deg') < np.radians(search_radius):
-                count += 1
+        evts_in_source_radius = GreatCircleDistance(ra_src, dec_src, ra_evt, dec_evt, unit = 'deg') < np.radians(search_radius)
+        if np.any(evts_in_source_radius):
+                count = 1
     
-    fraction = count / n_sources
-
-    return fraction
+    return count
 
 def fraction_of_events_sourcelist(sources_ra, sources_dec, data_ra, data_dec, search_radius):
     if len(sources_ra) != len(sources_dec):
@@ -34,24 +33,26 @@ def fraction_of_events_sourcelist(sources_ra, sources_dec, data_ra, data_dec, se
 
     fraction_sourcelist = np.zeros(n_sources)
     for i, (ra, dec) in enumerate(zip(sources_ra, sources_dec)):
-        fraction_sourcelist[i] = fraction_of_events_singlesource(ra, dec, data_ra, data_dec, search_radius, n_sources)
+        fraction_sourcelist[i] = fraction_of_events_singlesource(ra, dec, data_ra, data_dec, search_radius)
 
-    return fraction_sourcelist
+    fraction = np.sum(fraction_sourcelist)/n_sources
+
+    return fraction
 
 def run_correlation(sources_ra, sources_dec, data_ra, data_dec, r_min, r_max, r_step, seed):
     steps = np.linspace(r_min, r_max, r_step)
 
     results_dtype = [('seed', '<i4'),
-                      ('ra_scrambled',float ),
-                      ('dec_scrambled',float )]
+                      ('ra_scrambled',list ),
+                      ('dec_scrambled',list )]
 
     for i in steps:
         results_dtype.append((f'fraction_{i}', float))
     
-    results = np.zeros(len(sources_ra), dtype = results_dtype)
+    results = np.zeros(1, dtype = results_dtype)
     results['seed'] = np.ones_like(results['seed'])*seed
-    results['ra_scrambled'] = sources_ra
-    results['dec_scrambled'] = sources_dec
+    results['ra_scrambled'] = [sources_ra]
+    results['dec_scrambled'] = [sources_dec]
     for r in steps:
         fraction = fraction_of_events_sourcelist(sources_ra, sources_dec, data_ra, data_dec, r)
         results[f'fraction_{r}'] = fraction

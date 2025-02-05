@@ -20,7 +20,7 @@ def GreatCircleDistance(ra_1, dec_1, ra_2, dec_2, unit="rad"):
 
 def scramble_ra(ra_true, seed):
     """Scramble the r.a. with a given seed"""
-    np.random.RandomState(seed)
+    np.random.seed(seed)
     ra_rad_tmp = np.random.permutation(ra_true)
 
     return ra_rad_tmp

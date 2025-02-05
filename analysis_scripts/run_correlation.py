@@ -136,7 +136,7 @@ elif pao_hotspot_treatment == 'scramble_and_mask_with_candidate_sources':
     ra_scramble, dec_scramble = scramble.scramble_and_mask_hotspot(ra_true, dec_true, seed,
                                                             pao_hotspot_ra, pao_hotspot_dec, pao_hotspot_r )
     
-    results = correlation.run_correlation(ra_scramble, dec_true, cr_dataset['ra'], cr_dataset['dec'], r_min, r_max, r_step, seed)
+    results = correlation.run_correlation(ra_scramble, dec_scramble, cr_dataset['ra'], cr_dataset['dec'], r_min, r_max, r_step, seed)
 
 
 elif pao_hotspot_treatment == 'scramble_and_mask_without_candidate_sources':
@@ -149,7 +149,7 @@ elif pao_hotspot_treatment == 'scramble_and_mask_without_candidate_sources':
     ra_scramble, dec_scramble = scramble.scramble_and_mask_hotspot(ra_true, dec_true, seed,
                                                                 pao_hotspot_ra, pao_hotspot_dec, pao_hotspot_r )
 
-    results = correlation.run_correlation(ra_scramble, dec_true, cr_dataset['ra'], cr_dataset['dec'], r_min, r_max, r_step, seed)
+    results = correlation.run_correlation(ra_scramble, dec_scramble, cr_dataset['ra'], cr_dataset['dec'], r_min, r_max, r_step, seed)
 
 
 #save scrambled trials

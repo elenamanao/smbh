@@ -71,9 +71,13 @@ p.add_argument('--min_energy_dipole',
                type = float,
                default = 8,
                help = 'Minimum energy for the simulation of the events with the dipole')  
-p.add_argument("--seed",
+p.add_argument("--seed_initial",
                type = int, 
                default = 1, 
+               help = 'Seed for simulating')
+p.add_argument("--seed_final",
+               type = int, 
+               default = 100, 
                help = 'Seed for simulating')
 
 args = p.parse_args()
@@ -161,55 +165,57 @@ flux_values = auger_tools.dipole_flux(ra_grid, np.arcsin(dec_grid), d,  alpha_d,
 pdf_vertical = flux_values*exposure_vert
 pdf_inclined = flux_values*exposure_incl
 
-sim_ra_vert, sim_sindec_vert, sim_ra_incl, sim_sindec_incl = simulation.do_simulation(pdf_vertical, pdf_inclined, len(cr_vertical), len(cr_inclined), ra_bins, dec_bins, seed, n_vertical_events_final, n_inclined_events_final)
-sim_ra = np.concatenate([sim_ra_vert, sim_ra_incl])
-sim_sindec = np.concatenate([sim_sindec_vert, sim_sindec_incl])
+for seed in np.arange(args.seed_initial, args.seed_final, 2):
 
-sim_dec = np.arcsin(sim_sindec)
+    sim_ra_vert, sim_sindec_vert, sim_ra_incl, sim_sindec_incl = simulation.do_simulation(pdf_vertical, pdf_inclined, len(cr_vertical), len(cr_inclined), ra_bins, dec_bins, seed, n_vertical_events_final, n_inclined_events_final)
+    sim_ra = np.concatenate([sim_ra_vert, sim_ra_incl])
+    sim_sindec = np.concatenate([sim_sindec_vert, sim_sindec_incl])
 
-# print(f'Final number of simulated events: {len(sim_ra)}')
+    sim_dec = np.arcsin(sim_sindec)
 
-#first case, just scramble in r.a.
-if pao_hotspot_treatment == 'no_mask':
-    results = correlation.run_correlation(np.radians(sources['RA_deg']), np.radians(sources['DEC_deg']), sim_ra, sim_dec, r_min, r_max, r_step, seed)
+    # print(f'Final number of simulated events: {len(sim_ra)}')
 
-if pao_hotspot_treatment == 'mask':
-    #we mask both the data and the sources
-    gcd_sources = GreatCircleDistance(np.radians(sources['RA_deg']), 
-                                np.radians(sources['DEC_deg']),
-                                np.ones_like(sources['RA_deg'])*pao_hotspot_ra,
-                                np.ones_like(sources['DEC_deg'])*pao_hotspot_dec)
-    #remove those
-    check_distance_sources = gcd_sources > np.deg2rad(pao_hotspot_r)
-    sources = sources[check_distance_sources]
-    print(f"After cutting the sources in the PAO hotspot we are left with {len(sources)} sources.")
+    #first case, just scramble in r.a.
+    if pao_hotspot_treatment == 'no_mask':
+        results = correlation.run_correlation(np.radians(sources['RA_deg']), np.radians(sources['DEC_deg']), sim_ra, sim_dec, r_min, r_max, r_step, seed)
 
-    gcd_events = GreatCircleDistance(sim_ra, 
-                                sim_dec,
-                                np.ones_like(sim_ra)*pao_hotspot_ra,
-                                np.ones_like(sim_dec)*pao_hotspot_dec)
-    #remove those
-    check_distance_events = gcd_events > np.deg2rad(pao_hotspot_r)
-    sim_ra = sim_ra[check_distance_events]
-    sim_dec= sim_dec[check_distance_events]
-    print(f"After cutting the events in the PAO hotspot we are left with {len(sim_ra)} sources.")
+    if pao_hotspot_treatment == 'mask':
+        #we mask both the data and the sources
+        gcd_sources = GreatCircleDistance(np.radians(sources['RA_deg']), 
+                                    np.radians(sources['DEC_deg']),
+                                    np.ones_like(sources['RA_deg'])*pao_hotspot_ra,
+                                    np.ones_like(sources['DEC_deg'])*pao_hotspot_dec)
+        #remove those
+        check_distance_sources = gcd_sources > np.deg2rad(pao_hotspot_r)
+        sources = sources[check_distance_sources]
+        print(f"After cutting the sources in the PAO hotspot we are left with {len(sources)} sources.")
 
-    results = correlation.run_correlation(np.radians(sources['RA_deg']), np.radians(sources['DEC_deg']), sim_ra, sim_dec, r_min, r_max, r_step, seed)
+        gcd_events = GreatCircleDistance(sim_ra, 
+                                    sim_dec,
+                                    np.ones_like(sim_ra)*pao_hotspot_ra,
+                                    np.ones_like(sim_dec)*pao_hotspot_dec)
+        #remove those
+        check_distance_events = gcd_events > np.deg2rad(pao_hotspot_r)
+        sim_ra = sim_ra[check_distance_events]
+        sim_dec= sim_dec[check_distance_events]
+        print(f"After cutting the events in the PAO hotspot we are left with {len(sim_ra)} sources.")
+
+        results = correlation.run_correlation(np.radians(sources['RA_deg']), np.radians(sources['DEC_deg']), sim_ra, sim_dec, r_min, r_max, r_step, seed)
 
 
-#save trials
-outfilename = 'trials_'+pao_hotspot_treatment+f'_minEnergy_{min_energy_analysis}EeV_seed_{seed}.npy'
+    #save trials
+    outfilename = 'trials_'+pao_hotspot_treatment+f'_minEnergy_{min_energy_analysis}EeV_seed_{seed}.npy'
 
-outdir = args.outdir
+    outdir = args.outdir
 
-#check that directory exist
-if not os.path.exists(outdir):
-      os.makedirs(outdir)
-      print("Directory created successfully!")
-else:
-    print("Directory already exists!")
+    #check that directory exist
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+        print("Directory created successfully!")
+    else:
+        print("Directory already exists!")
 
-out_path = os.path.join(outdir, outfilename)
+    out_path = os.path.join(outdir, outfilename)
 
-print('Saving file as: ', out_path)
-np.save(out_path ,results )
+    print('Saving file as: ', out_path)
+    np.save(out_path ,results )

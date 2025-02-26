@@ -16,7 +16,11 @@ p.add_argument("--pao_hotspot_treatment",
 p.add_argument("--min_energy_analysis", 
                type = float,  
                help = '''Minimum energy of the cosmic rays (in EeV)''')
-p.add_argument("--n_seeds",
+p.add_argument("--seed_initial",
+               type = int, 
+               default = 0, 
+               help = 'Number of trials we want to perform.')
+p.add_argument("--seed_final",
                type = int, 
                default = 1000, 
                help = 'Number of trials we want to perform.')
@@ -33,11 +37,13 @@ def run_script(seed):
         "--outdir", "./trials_simulation",
         "--pao_hotspot_treatment", args.pao_hotspot_treatment,
         "--min_energy_analysis", str(args.min_energy_analysis),
-        "--seed", str(seed)
+        "--seed_initial", str(seed_initial),
+        "--seed_final", str(seed_final)
     ])
 if __name__ == "__main__":
-    num_seeds = args.n_seeds  # Test with just two seeds
+    seed_initial = args.seed_initial  # Test with just two seeds
+    seed_final = args.seed_final
     num_workers = mp.cpu_count()  # Adjust based on your system
 
     with mp.Pool(num_workers) as pool:
-        pool.map(run_script, np.arange(0, 2*num_seeds, 2))
+        pool.map(run_script, np.arange(seed_initial, 2*seed_final, 2))

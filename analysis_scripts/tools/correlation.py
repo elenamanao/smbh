@@ -16,45 +16,45 @@ def GreatCircleDistance(ra_1, dec_1, ra_2, dec_2, unit="rad"):
     ) ** 2.0
     return 2.0 * np.arcsin(np.sqrt(x))
 
-def fraction_of_events_singlesource(ra_src, dec_src, data_ra, data_dec, search_radius):
+def fraction_of_sources_singleevent(ra_src, dec_src, evt_ra, evt_dec, search_radius):
     count = 0
-    for ra_evt, dec_evt in zip(data_ra, data_dec):
-        evts_in_source_radius = GreatCircleDistance(ra_src, dec_src, ra_evt, dec_evt, unit = 'deg') < np.radians(search_radius)
-        if np.any(evts_in_source_radius):
+    for ra_src, dec_src in zip(ra_src, dec_src):
+        source_in_event_radius = GreatCircleDistance(ra_src, dec_src, evt_ra, evt_dec) < np.radians(search_radius)
+        if np.any(source_in_event_radius):
                 count = 1
     
     return count
 
-def fraction_of_events_sourcelist(sources_ra, sources_dec, data_ra, data_dec, search_radius):
-    if len(sources_ra) != len(sources_dec):
-        print('Check your sources! RA and DEC must have the same length')
-    elif len(sources_ra) == len(sources_dec):
-        n_sources = len(sources_ra)
+def fraction_of_sources_allevents(source_ra, source_dec, data_ra, data_dec, search_radius):
+    if len(data_ra) != len(data_dec):
+        print('Check your data! RA and DEC must have the same length')
+    elif len(data_ra) == len(data_ra):
+        n_events = len(data_ra)
 
-    fraction_sourcelist = np.zeros(n_sources)
-    for i, (ra, dec) in enumerate(zip(sources_ra, sources_dec)):
-        fraction_sourcelist[i] = fraction_of_events_singlesource(ra, dec, data_ra, data_dec, search_radius)
+    fraction_eventlist = np.zeros(n_events)
+    for i, (ra, dec) in enumerate(zip(data_ra, data_dec)):
+        fraction_eventlist[i] = fraction_of_sources_singleevent(source_ra, source_dec, ra, dec, np.radians(search_radius))
 
-    fraction = np.sum(fraction_sourcelist)/n_sources
+    fraction = np.sum(fraction_eventlist)/n_events
 
     return fraction
 
 def run_correlation(sources_ra, sources_dec, data_ra, data_dec, r_min, r_max, r_step, seed):
-    steps = np.linspace(r_min, r_max, r_step)
+    steps = np.arange(r_min, r_max, r_step)
 
     results_dtype = [('seed', '<i4'),
-                      ('ra_scrambled',list ),
-                      ('dec_scrambled',list )]
+                      ('ra',list ),
+                      ('dec',list )]
 
     for i in steps:
         results_dtype.append((f'fraction_{i}', float))
     
     results = np.zeros(1, dtype = results_dtype)
     results['seed'] = np.ones_like(results['seed'])*seed
-    results['ra_scrambled'] = [sources_ra]
-    results['dec_scrambled'] = [sources_dec]
+    results['ra'] = [data_ra]
+    results['dec'] = [data_dec]
     for r in steps:
-        fraction = fraction_of_events_sourcelist(sources_ra, sources_dec, data_ra, data_dec, r)
+        fraction = fraction_of_sources_allevents(sources_ra, sources_dec, data_ra, data_dec, r)
         results[f'fraction_{r}'] = fraction
     
     return results

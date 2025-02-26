@@ -127,7 +127,6 @@ n_inclined_events_final = len(cr_inclined[mask_energy_inclined_analysis])
 # print(f'The number of vertical events in the dataset with energy above {args.min_energy_dipole}EeV is: ', len(cr_vertical))
 # print(f'The number of inclined events in the dataset with energy above {args.min_energy_dipole}EeV is: ', len(cr_inclined))
 
-seed = args.seed
 pao_hotspot_treatment = args.pao_hotspot_treatment
 mode = args.mode 
 

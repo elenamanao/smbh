@@ -168,37 +168,7 @@ for i, seed in enumerate(seeds):
     results['ra'][i] = sim_ra
     results['dec'][i] = sim_dec
 
-    # # print(f'Final number of simulated events: {len(sim_ra)}')
-
-    # #first case, just scramble in r.a.
-    # if pao_hotspot_treatment == 'no_mask':
-    #     results = correlation.run_correlation(np.radians(sources['RA_deg']), np.radians(sources['DEC_deg']), sim_ra, sim_dec, r_min, r_max, r_step, seed)
-
-    # if pao_hotspot_treatment == 'mask':
-    #     #we mask both the data and the sources
-    #     gcd_sources = auger_tools.GreatCircleDistance(np.radians(sources['RA_deg']), 
-    #                                 np.radians(sources['DEC_deg']),
-    #                                 np.ones_like(sources['RA_deg'])*pao_hotspot_ra,
-    #                                 np.ones_like(sources['DEC_deg'])*pao_hotspot_dec)
-    #     #remove those
-    #     check_distance_sources = gcd_sources > np.deg2rad(pao_hotspot_r)
-    #     sources = sources[check_distance_sources]
-    #     print(f"After cutting the sources in the PAO hotspot we are left with {len(sources)} sources.")
-
-    #     gcd_events = auger_tools.GreatCircleDistance(sim_ra, 
-    #                                 sim_dec,
-    #                                 np.ones_like(sim_ra)*pao_hotspot_ra,
-    #                                 np.ones_like(sim_dec)*pao_hotspot_dec)
-    #     #remove those
-    #     check_distance_events = gcd_events > np.deg2rad(pao_hotspot_r)
-    #     sim_ra = sim_ra[check_distance_events]
-    #     sim_dec= sim_dec[check_distance_events]
-    #     print(f"After cutting the events in the PAO hotspot we are left with {len(sim_ra)} sources.")
-
-    #     results = correlation.run_correlation(np.radians(sources['RA_deg']), np.radians(sources['DEC_deg']), sim_ra, sim_dec, r_min, r_max, r_step, seed)
-
-
-    #save trials
+#save trials
 outfilename = 'trials_'+pao_hotspot_treatment+f'_minEnergy_{min_energy_analysis}EeV_seed_in_{args.seed_initial}_seed_fin_{args.seed_final}.npy'
 
 outdir = args.outdir
@@ -213,4 +183,4 @@ else:
 out_path = os.path.join(outdir, outfilename)
 
 print('Saving file as: ', out_path)
-np.save(out_path ,results )
+np.save(out_path ,results)

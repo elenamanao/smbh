@@ -113,61 +113,64 @@ for i in steps:
 results = np.zeros(len(events), dtype = results_dtype)
 sources_ra_rad, sources_dec_rad = np.radians(sources['RA_deg']), np.radians(sources['DEC_deg'])
 
-for i, seed in enumerate(events['seed']): 
-    results['seed'][i] = seed
-    results['ra'][i] = events['ra'][i]
-    results['dec'][i] = events['dec'][i]  
-    for step in steps:
-        #first case, just scramble in r.a.
-        if pao_hotspot_treatment == 'no_mask':
-            results[f'fraction_{step}'][i] = correlation.fraction_of_sources_allevents(sources_ra_rad, 
-                                                  sources_dec_rad, 
-                                                  events['ra'][i], 
-                                                  events['dec'][i], 
-                                                  np.radians(step))
+seed_batches = np.array_split(events['seed'], 100)
 
-        if pao_hotspot_treatment == 'mask':
-            #we mask both the data and the sources
-            gcd_sources = auger_tools.GreatCircleDistance(sources_ra_rad, 
-                                        sources_dec_rad,
-                                        np.ones_like(sources['RA_deg'])*pao_hotspot_ra,
-                                        np.ones_like(sources['DEC_deg'])*pao_hotspot_dec)
-            #remove those
-            check_distance_sources = gcd_sources > np.deg2rad(pao_hotspot_r)
-            sources = sources[check_distance_sources]
-            print(f"After cutting the sources in the PAO hotspot we are left with {len(sources)} sources.")
+for batch in seed_batches:
+    for i, seed in enumerate(batch): 
+        results['seed'][i] = seed
+        results['ra'][i] = events['ra'][i]
+        results['dec'][i] = events['dec'][i]  
+        for step in steps:
+            #first case, just scramble in r.a.
+            if pao_hotspot_treatment == 'no_mask':
+                results[f'fraction_{step}'][i] = correlation.fraction_of_sources_allevents(sources_ra_rad, 
+                                                    sources_dec_rad, 
+                                                    events['ra'][i], 
+                                                    events['dec'][i], 
+                                                    np.radians(step))
 
-            gcd_events = auger_tools.GreatCircleDistance(results['ra'][i], 
-                                        results['dec'][i],
-                                        np.ones_like(results['ra'][i])*pao_hotspot_ra,
-                                        np.ones_like(results['dec'][i])*pao_hotspot_dec)
-            #remove those
-            check_distance_events = gcd_events > np.deg2rad(pao_hotspot_r)
-            results['ra'][i] = results['ra'][i][check_distance_events]
-            results['dec'][i]= results['dec'][i][check_distance_events]
-            print(f"After cutting the events in the PAO hotspot we are left with {len(results['dec'][i])} sources.")
+            if pao_hotspot_treatment == 'mask':
+                #we mask both the data and the sources
+                gcd_sources = auger_tools.GreatCircleDistance(sources_ra_rad, 
+                                            sources_dec_rad,
+                                            np.ones_like(sources['RA_deg'])*pao_hotspot_ra,
+                                            np.ones_like(sources['DEC_deg'])*pao_hotspot_dec)
+                #remove those
+                check_distance_sources = gcd_sources > np.deg2rad(pao_hotspot_r)
+                sources = sources[check_distance_sources]
+                print(f"After cutting the sources in the PAO hotspot we are left with {len(sources)} sources.")
 
-            results[f'fraction_{step}'][i] = correlation.fraction_of_sources_allevents(sources_ra_rad, 
-                                        sources_dec_rad, 
-                                        results['ra'][i], 
-                                        results['dec'][i], 
-                                        step)
+                gcd_events = auger_tools.GreatCircleDistance(results['ra'][i], 
+                                            results['dec'][i],
+                                            np.ones_like(results['ra'][i])*pao_hotspot_ra,
+                                            np.ones_like(results['dec'][i])*pao_hotspot_dec)
+                #remove those
+                check_distance_events = gcd_events > np.deg2rad(pao_hotspot_r)
+                results['ra'][i] = results['ra'][i][check_distance_events]
+                results['dec'][i]= results['dec'][i][check_distance_events]
+                print(f"After cutting the events in the PAO hotspot we are left with {len(results['dec'][i])} sources.")
 
-seed_initial, seed_final = np.amin(events['seed']), np.amax(events['seed']) 
+                results[f'fraction_{step}'][i] = correlation.fraction_of_sources_allevents(sources_ra_rad, 
+                                            sources_dec_rad, 
+                                            results['ra'][i], 
+                                            results['dec'][i], 
+                                            step)
 
-#save trials
-outfilename = 'correlation_'+pao_hotspot_treatment+f'_initial_seed_{seed_initial}_final_seed{seed_final}.npy'
+        seed_initial, seed_final = np.amin(events['seed']), np.amax(events['seed']) 
 
-outdir = args.outdir
+    #save trials
+    outfilename = 'correlation_'+pao_hotspot_treatment+f'_initial_seed_{np.amin(batch)}_final_seed{np.amax(batch)}.npy'
 
-#check that directory exist
-if not os.path.exists(outdir):
-    os.makedirs(outdir)
-    print("Directory created successfully!")
-else:
-    print("Directory already exists!")
+    outdir = args.outdir
 
-out_path = os.path.join(outdir, outfilename)
+    #check that directory exist
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+        print("Directory created successfully!")
+    else:
+        print("Directory already exists!")
 
-print('Saving file as: ', out_path)
-np.save(out_path ,results )
+    out_path = os.path.join(outdir, outfilename)
+
+    print('Saving file as: ', out_path)
+    np.save(out_path ,results )

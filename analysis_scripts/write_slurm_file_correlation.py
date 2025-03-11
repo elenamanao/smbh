@@ -41,6 +41,8 @@ slurmnames = [f"{args.slurm_basename}_{i}.slurm" for i in range(n_slurm)]
 
 files_per_slurm = np.array_split(files, n_slurm)
 
+filter_sources = args.filter_sources
+
 for slurm, files in zip(slurmnames, files_per_slurm):
     with open(slurm, "w") as fout:
         fout.write(f'''#!/bin/bash
@@ -61,11 +63,13 @@ module load slurm_setup
 # Define file list
 FILES=({ " ".join(files) })
 
+FILTER={filter_sources}
+
 # Get file for this task
 INPUT_FILE=${{FILES[$SLURM_ARRAY_TASK_ID]}}
 
 # Run the script with the selected file
-./run_correlation $INPUT_FILE
+./run_correlation $INPUT_FILE $FILTER
 ''')
 
 

@@ -55,26 +55,22 @@ sources = pd.read_hdf(sourcelist_path, key = 'values')
 if np.isin([args.filter_sources], ['all_sources', 'AGN', 'non_AGN']):
     print('The filter sources entry is not valid! Check the helpstring :)')
 
-if args.filter_sources == 'all_sources':
+filter_sources = args.filter_sources
+
+if filter_sources == 'all_sources':
     print('We run the correlation using all the sources in the list!')
-elif args.filter_sources == 'AGN':
+elif filter_sources == 'AGN':
     print('Selecting only AGN in the list')
     mask = sources['Activity'] == True
     sources = sources[mask]
     print('We are left with', len(sources), 'objects in the list')
-elif args.filter_sources == 'non_AGN':
+elif filter_sources == 'non_AGN':
     print('Selecting only non AGN in the list')
     mask = sources['Activity'] == True
     sources = sources[~mask]
     print('We are left with', len(sources), 'objects in the list')
 
-# load cosmic rays dataset
-
-
 n_sources_initial = len(sources)
-# print(f"The provided list contains {n_sources_initial} objects.")
-
-#load skymap
 
 events = np.load(args.sky_map_file, allow_pickle= True)
 
@@ -159,7 +155,7 @@ for batch in seed_batches:
         seed_initial, seed_final = np.amin(events['seed']), np.amax(events['seed']) 
 
     #save trials
-    outfilename = 'correlation_'+pao_hotspot_treatment+f'_initial_seed_{np.amin(batch)}_final_seed{np.amax(batch)}.npy'
+    outfilename = 'correlation_'+filter_sources+f'_initial_seed_{np.amin(batch)}_final_seed{np.amax(batch)}.npy'
 
     outdir = args.outdir
 

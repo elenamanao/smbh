@@ -18,10 +18,16 @@ def GreatCircleDistance(ra_1, dec_1, ra_2, dec_2, unit="rad"):
 
 def fraction_of_sources_singleevent(ra_src, dec_src, evt_ra, evt_dec, search_radius):
     count = 0
+    i = 0
+    source_in_event_radius = []
     for ra_src, dec_src in zip(ra_src, dec_src):
-        source_in_event_radius = GreatCircleDistance(ra_src, dec_src, evt_ra, evt_dec) < search_radius
-        if np.any(source_in_event_radius):
-                count = 1
+        check_distance = GreatCircleDistance(ra_src, dec_src, evt_ra, evt_dec) < search_radius
+        source_in_event_radius = np.append(source_in_event_radius, check_distance)
+        if check_distance:
+            i += 1
+    if np.any(source_in_event_radius):
+            count = 1
+            # print('We have', i, 'sources in the event radius')
     
     return count
 

@@ -34,11 +34,6 @@ p.add_argument("--mask_declination",
                type = bool, 
                default = True, 
                help = 'Remove sources not visible by Pierre Auger Observatory')
-p.add_argument("--pao_hotspot_treatment", 
-               type = str,  
-               help = '''How to mask the PAO hotspot. Here are the options:
-               - no_mask: don't mask the hotspot'''
-                )
 p.add_argument("--search_radius",
                type = list,
                nargs='+',
@@ -80,14 +75,6 @@ mask_energy = all_events['energy'] > 20
 
 all_events_analysis = all_events[mask_energy]
 
-pao_hotspot_treatment = args.pao_hotspot_treatment
-mode = args.mode 
-
-if np.isin([pao_hotspot_treatment], ['no_mask', 'mask']):
-    print("These trials will be produced for this case: ", pao_hotspot_treatment)
-else:
-    print("The pao_hotspot_treatment you specified is not defined! Try checking for typos and reading the docstrings :))")
-
 #apply masks
 if args.mask_declination:
     print('Removing the sources that are not visible by PAO...')
@@ -96,10 +83,6 @@ if args.mask_declination:
 
 # define the range for angular search
 r_min, r_max, r_step = args.search_radius
-
-#now the scrambling 
-
-pao_hotspot_ra, pao_hotspot_dec, pao_hotspot_r = 201.24634811, -45.37596794, 27
 
 ra_true = sources.RA_deg.values #r.a. of the sources
 dec_true = sources.DEC_deg.values #dec of the sources 
@@ -120,40 +103,11 @@ results['dec']= all_events_analysis['dec']
 
 for step in steps:
     #first case, just scramble in r.a.
-    if pao_hotspot_treatment == 'no_mask':
-        results[f'fraction_{step}'] = correlation.fraction_of_sources_allevents(sources_ra_rad, 
-                                                    sources_dec_rad, 
-                                                    all_events_analysis['ra'], 
-                                                    all_events_analysis['dec'], 
-                                                    np.radians(step))
-
-        if pao_hotspot_treatment == 'mask':
-            #we mask both the data and the sources
-            gcd_sources = auger_tools.GreatCircleDistance(sources_ra_rad, 
-                                        sources_dec_rad,
-                                        np.ones_like(sources['RA_deg'])*pao_hotspot_ra,
-                                        np.ones_like(sources['DEC_deg'])*pao_hotspot_dec)
-            #remove those
-            check_distance_sources = gcd_sources > np.deg2rad(pao_hotspot_r)
-            sources = sources[check_distance_sources]
-            print(f"After cutting the sources in the PAO hotspot we are left with {len(sources)} sources.")
-
-            gcd_events = auger_tools.GreatCircleDistance(results['ra'][i], 
-                                        results['dec'][i],
-                                        np.ones_like(results['ra'])*pao_hotspot_ra,
-                                        np.ones_like(results['dec'])*pao_hotspot_dec)
-                 #remove those
-            check_distance_events = gcd_events > np.deg2rad(pao_hotspot_r)
-            results['ra'] = results['ra'][check_distance_events]
-            results['dec']= results['dec'][check_distance_events]
-            print(f"After cutting the events in the PAO hotspot we are left with {len(results['dec'])} sources.")
-
-            results[f'fraction_{step}'] = correlation.fraction_of_sources_allevents(sources_ra_rad, 
-                                        sources_dec_rad, 
-                                        all_events_analysis['ra'], 
-                                        all_events_analysis['dec'], 
-                                        step)
-
+    results[f'fraction_{step}'] = correlation.fraction_of_sources_allevents(sources_ra_rad, 
+                                                sources_dec_rad, 
+                                                all_events_analysis['ra'], 
+                                                all_events_analysis['dec'], 
+                                                np.radians(step))
 
     #save trials
     outfilename = 'correlation_'+filter_sources+f'_results.npy'

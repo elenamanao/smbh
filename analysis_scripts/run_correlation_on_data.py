@@ -103,7 +103,7 @@ results['dec']= all_events_analysis['dec']
 
 for step in steps:
     #first case, just scramble in r.a.
-    results[f'fraction_{step}'] = correlation.fraction_of_sources_allevents(sources_ra_rad, 
+    results[f'fraction_{step}'] = correlation.fraction_of_associated_events(sources_ra_rad, 
                                                 sources_dec_rad, 
                                                 all_events_analysis['ra'], 
                                                 all_events_analysis['dec'], 

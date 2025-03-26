@@ -110,7 +110,7 @@ for batch in seed_batches:
         for step in steps:
             #first case, just scramble in r.a.
             if pao_hotspot_treatment == 'no_mask':
-                results[f'fraction_{step}'][i] = correlation.fraction_of_sources_allevents(sources_ra_rad, 
+                results[f'fraction_{step}'][i] = correlation.fraction_of_associated_events(sources_ra_rad, 
                                                     sources_dec_rad, 
                                                     events['ra'][i], 
                                                     events['dec'][i], 
@@ -137,7 +137,7 @@ for batch in seed_batches:
                 results['dec'][i]= results['dec'][i][check_distance_events]
                 print(f"After cutting the events in the PAO hotspot we are left with {len(results['dec'][i])} sources.")
 
-                results[f'fraction_{step}'][i] = correlation.fraction_of_sources_allevents(sources_ra_rad, 
+                results[f'fraction_{step}'][i] = correlation.fraction_of_associated_events(sources_ra_rad, 
                                             sources_dec_rad, 
                                             results['ra'][i], 
                                             results['dec'][i], 

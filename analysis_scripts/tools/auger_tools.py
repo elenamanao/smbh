@@ -38,7 +38,6 @@ def exposure(dec, theta_max=np.radians(60)):
     return exposure
 
 def LoadExposureMap(theta_max_vert, theta_max_incl,  dec):
-
     # Compute the exposure_map for each pixel regarding its declination.
     exposure_map_total = exposure(dec, np.radians(theta_max_incl)) # Exposure from 0° to 80°
     exposure_map_vert = exposure(dec, np.radians(theta_max_vert))  # Exposure from 0° to 60°

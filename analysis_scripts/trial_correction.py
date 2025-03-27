@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import argparse
 sys.path.append('tools')
 
-from tools import statistics
+from analysis_scripts.tools import statistics_utils
 
 p = argparse.ArgumentParser(description="Input parameters producing trials for correaltion analysis.")
 
@@ -49,7 +49,7 @@ for f, trialfile in enumerate(trial_files):
     for i in np.arange(n):
         tmp_pval = []
         for step in steps:
-            pval = statistics.calculate_pvalue_from_trials(trials[f'fraction_{step}'],trials[f'fraction_{step}'][i])
+            pval = statistics_utils.calculate_pvalue_from_trials(trials[f'fraction_{step}'],trials[f'fraction_{step}'][i])
             tmp_pval.append(pval)
     
         pval_distribution[f'pvalue_{f+1}'][i] = np.amin(tmp_pval)

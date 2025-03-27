@@ -80,6 +80,7 @@ if args.mask_declination:
     print('Removing the sources that are not visible by PAO...')
     mask = sources["DEC_deg"] < 44.8 # maximum declination visible by PAO when including also inclined events
     sources = sources[mask]
+    print('We are left with', len(sources), 'sources')
 
 # define the range for angular search
 r_min, r_max, r_step = args.search_radius
@@ -98,30 +99,30 @@ for i in steps:
 results = np.zeros(1, dtype = results_dtype)
 sources_ra_rad, sources_dec_rad = np.radians(sources['RA_deg']), np.radians(sources['DEC_deg'])
 
-results['ra'] = all_events_analysis['ra']
-results['dec']= all_events_analysis['dec']
+results['ra'] = [all_events_analysis['ra']]
+results['dec']= [all_events_analysis['dec']]
 
 for step in steps:
     #first case, just scramble in r.a.
     results[f'fraction_{step}'] = correlation.fraction_of_associated_events(sources_ra_rad, 
                                                 sources_dec_rad, 
-                                                all_events_analysis['ra'], 
-                                                all_events_analysis['dec'], 
+                                                np.radians(all_events_analysis['ra']), 
+                                                np.radians(all_events_analysis['dec']), 
                                                 np.radians(step))
 
-    #save trials
-    outfilename = 'correlation_'+filter_sources+f'_results.npy'
+#save
+outfilename = 'correlation_'+filter_sources+f'_results.npy'
 
-    outdir = args.outdir
+outdir = args.outdir
 
-    #check that directory exist
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
-        print("Directory created successfully!")
-    else:
-        print("Directory already exists!")
+#check that directory exist
+if not os.path.exists(outdir):
+    os.makedirs(outdir)
+    print("Directory created successfully!")
+else:
+    print("Directory already exists!")
 
-    out_path = os.path.join(outdir, outfilename)
+out_path = os.path.join(outdir, outfilename)
 
-    print('Saving file as: ', out_path)
-    np.save(out_path ,results )
+print('Saving file as: ', out_path)
+np.save(out_path ,results )

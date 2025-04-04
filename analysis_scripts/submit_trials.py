@@ -30,7 +30,7 @@ args = p.parse_args()
 
 def run_script(seed):
     subprocess.run([
-        "python", "run_correlation.py",
+        "python", "../smbh/analysis_scripts/run_correlation.py",
         "--sourcelist", "../sources_coords.h5",
         "--cr_vertical", "../data/cr_vertical_events.npy",
         "--cr_inclined", "../data/cr_inclined_events.npy",

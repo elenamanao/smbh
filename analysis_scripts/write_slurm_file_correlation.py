@@ -28,7 +28,7 @@ p.add_argument("--slurm_basename",
 args = p.parse_args()
 
 
-files = glob.glob(args.file_dir + "/*")
+files = sorted(glob.glob(args.file_dir + "/*"))
 
 print(f"The trials are distributed over {len(files)} files")
 

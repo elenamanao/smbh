@@ -34,12 +34,9 @@ p.add_argument("--mask_declination",
 p.add_argument("--pao_hotspot_treatment", 
                type = str,  
                help = '''How to mask the PAO hotspot. Here are the options:
-               - no_mask: don't mask the hotspot'''
+               - no_mask: don't mask the hotspot
+               -mask: mask the hotspot'''
                 )
-p.add_argument("--mode", 
-               type = str,
-               default = 'simulation'  ,
-               help = ''' Do you want to run the analysis on a simulation or on data?''')
 p.add_argument("--search_radius",
                type = list,
                nargs='+',
@@ -51,9 +48,6 @@ args = p.parse_args()
 # load source list
 sourcelist_path = args.sourcelist
 sources = pd.read_hdf(sourcelist_path, key = 'values')
-
-if np.isin([args.filter_sources], ['all_sources', 'AGN', 'non_AGN']):
-    print('The filter sources entry is not valid! Check the helpstring :)')
 
 filter_sources = args.filter_sources
 
@@ -75,23 +69,21 @@ n_sources_initial = len(sources)
 events = np.load(args.sky_map_file, allow_pickle= True)
 
 pao_hotspot_treatment = args.pao_hotspot_treatment
-mode = args.mode 
 
 if np.isin([pao_hotspot_treatment], ['no_mask', 'mask']):
     print("These trials will be produced for this case: ", pao_hotspot_treatment)
 else:
-    print("The pao_hotspot_treatment you specified is not defined! Try checking for typos and reading the docstrings :))")
+    print("The pao_hotspot_treatment you specified is not defined! Try checking for typos and reading the docstrings")
 
 #apply masks
 if args.mask_declination:
     print('Removing the sources that are not visible by PAO...')
     mask = sources["DEC_deg"] < 44.8 # maximum declination visible by PAO when including also inclined events
     sources = sources[mask]
+    print('We are left with', len(sources), 'objects in the list')
 
 # define the range for angular search
 r_min, r_max, r_step = args.search_radius
-
-#now the scrambling 
 
 pao_hotspot_ra, pao_hotspot_dec, pao_hotspot_r = 201.24634811, -45.37596794, 27
 
@@ -106,12 +98,11 @@ steps = np.arange(r_min, r_max, r_step)
 for i in steps:
     results_dtype.append((f'fraction_{i}', float))
 
-results = np.zeros(len(events), dtype = results_dtype)
 sources_ra_rad, sources_dec_rad = np.radians(sources['RA_deg']), np.radians(sources['DEC_deg'])
-
 seed_batches = np.array_split(events['seed'], 100)
 
 for batch in seed_batches:
+    results = np.zeros(len(batch), dtype = results_dtype)
     for i, seed in enumerate(batch): 
         results['seed'][i] = seed
         results['ra'][i] = events['ra'][i]
@@ -119,7 +110,7 @@ for batch in seed_batches:
         for step in steps:
             #first case, just scramble in r.a.
             if pao_hotspot_treatment == 'no_mask':
-                results[f'fraction_{step}'][i] = correlation.fraction_of_sources_allevents(sources_ra_rad, 
+                results[f'fraction_{step}'][i] = correlation.fraction_of_associated_events(sources_ra_rad, 
                                                     sources_dec_rad, 
                                                     events['ra'][i], 
                                                     events['dec'][i], 
@@ -146,7 +137,7 @@ for batch in seed_batches:
                 results['dec'][i]= results['dec'][i][check_distance_events]
                 print(f"After cutting the events in the PAO hotspot we are left with {len(results['dec'][i])} sources.")
 
-                results[f'fraction_{step}'][i] = correlation.fraction_of_sources_allevents(sources_ra_rad, 
+                results[f'fraction_{step}'][i] = correlation.fraction_of_associated_events(sources_ra_rad, 
                                             sources_dec_rad, 
                                             results['ra'][i], 
                                             results['dec'][i], 

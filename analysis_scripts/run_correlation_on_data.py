@@ -70,11 +70,12 @@ inclined_events = np.load(args.inclined_data_path, allow_pickle = True)
 vertical_events = np.load(args.vertical_data_path, allow_pickle = True)
 
 all_events = np.concatenate((inclined_events, vertical_events))
+print(np.amin(all_events['ra']), np.amax(all_events['ra']))
 
 mask_energy = all_events['energy'] > 20
 
 all_events_analysis = all_events[mask_energy]
-
+print('We run the analysis using', len(all_events_analysis), 'events')
 #apply masks
 if args.mask_declination:
     print('Removing the sources that are not visible by PAO...')
@@ -88,8 +89,8 @@ r_min, r_max, r_step = args.search_radius
 ra_true = sources.RA_deg.values #r.a. of the sources
 dec_true = sources.DEC_deg.values #dec of the sources 
 
-results_dtype = [     ('ra',list ),
-                      ('dec',list )]
+results_dtype = [('ra',list ),
+                 ('dec',list )]
 
 
 steps = np.arange(r_min, r_max, r_step)

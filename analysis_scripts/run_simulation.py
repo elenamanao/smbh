@@ -47,6 +47,13 @@ p.add_argument("--seed_final",
                type = int, 
                default = 100, 
                help = 'Last seed to use')
+p.add_argument('--mode',
+               type = str,
+               default = 'sample',
+               help = '''default is sample: simulate only the events in the sample (~600)
+                If you want to so a simulation forecasting what would happen with the full sample
+                of the events, pass 'all_statistics' as argument 
+               ''')
 
 args = p.parse_args()
 
@@ -67,11 +74,11 @@ cr_inclined = cr_inclined[mask_energy_inclined]
 min_energy_analysis = args.min_energy_analysis
 mask_energy_vertical_analysis = cr_vertical["energy"] > min_energy_analysis
 mask_energy_inclined_analysis = cr_inclined["energy"] > min_energy_analysis
-n_vertical_events_final = len(cr_vertical[mask_energy_vertical_analysis])
-n_inclined_events_final = len(cr_inclined[mask_energy_inclined_analysis])
+# n_vertical_events_final = len(cr_vertical[mask_energy_vertical_analysis])
+# n_inclined_events_final = len(cr_inclined[mask_energy_inclined_analysis])
 
 #dipole information
-d,  alpha_d, delta_d = 0.074, np.radians(97), np.radians(-38) 
+d, alpha_d, delta_d = 0.074, np.radians(97), np.radians(-38) 
 
 # define the coordinates grid
 ra_bins, dec_bins = np.linspace(0,2*np.pi, 1000), np.linspace(-1, 1, 1000)
@@ -97,8 +104,22 @@ results_dtype = [('seed', '<i4'),
 
 results = np.zeros(len(seeds), dtype = results_dtype)
 
+mode = args.mode
+
+if mode == 'sample':
+    print('Simulating the events in the public sample')
+    n_events_vertical, n_events_inclined = len(cr_vertical), len(cr_inclined)
+    n_vertical_events_final = len(cr_vertical[mask_energy_vertical_analysis])
+    n_inclined_events_final = len(cr_inclined[mask_energy_inclined_analysis])
+
+if mode == 'all_statistics':
+    print('Producing a simulation of the full sample of events')
+    n_events_vertical, n_events_inclined = (len(cr_vertical)-109)*10+109, len(cr_inclined)*10
+    n_vertical_events_final = (len(cr_vertical[mask_energy_vertical_analysis])-109)*10 + 109
+    n_inclined_events_final = len(cr_inclined[mask_energy_inclined_analysis])*10
+
 for i, seed in enumerate(seeds):
-    sim_ra_vert, sim_sindec_vert, sim_ra_incl, sim_sindec_incl = simulation.do_simulation(pdf_vertical, pdf_inclined, len(cr_vertical), len(cr_inclined), ra_bins, dec_bins, seed, n_vertical_events_final, n_inclined_events_final)
+    sim_ra_vert, sim_sindec_vert, sim_ra_incl, sim_sindec_incl = simulation.do_simulation(pdf_vertical, pdf_inclined, n_events_vertical, n_events_inclined, ra_bins, dec_bins, seed, n_vertical_events_final, n_inclined_events_final)
     sim_ra = np.concatenate([sim_ra_vert, sim_ra_incl])
     sim_sindec = np.concatenate([sim_sindec_vert, sim_sindec_incl])
 

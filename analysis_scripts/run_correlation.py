@@ -105,15 +105,15 @@ for batch in seed_batches:
     results = np.zeros(len(batch), dtype = results_dtype)
     for i, seed in enumerate(batch): 
         results['seed'][i] = seed
-        results['ra'][i] = events['ra'][i]
-        results['dec'][i] = events['dec'][i]  
+        results['ra'][i] = events['ra'][seed]
+        results['dec'][i] = events['dec'][seed]  
         for step in steps:
             #first case, just scramble in r.a.
             if pao_hotspot_treatment == 'no_mask':
                 results[f'fraction_{step}'][i] = correlation.fraction_of_associated_events(sources_ra_rad, 
                                                     sources_dec_rad, 
-                                                    events['ra'][i], 
-                                                    events['dec'][i], 
+                                                    events['ra'][seed], 
+                                                    events['dec'][seed], 
                                                     np.radians(step))
 
             if pao_hotspot_treatment == 'mask':

@@ -104,16 +104,18 @@ seed_batches = np.array_split(events['seed'], 100)
 for batch in seed_batches:
     results = np.zeros(len(batch), dtype = results_dtype)
     for i, seed in enumerate(batch): 
+        print(seed)
+        mask = events['seed'] == seed
         results['seed'][i] = seed
-        results['ra'][i] = events['ra'][seed]
-        results['dec'][i] = events['dec'][seed]  
+        results['ra'][i] = events['ra'][mask][0]
+        results['dec'][i] = events['dec'][mask][0]
         for step in steps:
             #first case, just scramble in r.a.
             if pao_hotspot_treatment == 'no_mask':
                 results[f'fraction_{step}'][i] = correlation.fraction_of_associated_events(sources_ra_rad, 
                                                     sources_dec_rad, 
-                                                    events['ra'][seed], 
-                                                    events['dec'][seed], 
+                                                    events['ra'][mask][0], 
+                                                    events['dec'][mask][0], 
                                                     np.radians(step))
 
             if pao_hotspot_treatment == 'mask':

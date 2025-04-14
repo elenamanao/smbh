@@ -22,7 +22,7 @@ def get_bin_centers(bins):
     bc = 0.5*(bins[1:]+bins[:-1])
     return bc
             
-def do_simulation(pdf_vertical, pdf_inclined, n_events_vert, n_events_incl, ra_bins, dec_bins, seed, n_vertical_events_final, n_inclined_events_final):
+def do_simulation_bigged_seed(pdf_vertical, pdf_inclined, n_events_vert, n_events_incl, ra_bins, dec_bins, seed, n_vertical_events_final, n_inclined_events_final):
     
     # Compute the cumulative distribution function (CDF) # Normalize to form a probability density
     cdf_2d_vert = np.cumsum(pdf_vertical, axis=1)  # Compute along RA first
@@ -66,5 +66,48 @@ def do_simulation(pdf_vertical, pdf_inclined, n_events_vert, n_events_incl, ra_b
     n_random_inclined_events = np.random.poisson(n_inclined_events_final)
     scrambled_ra_incl = scrambled_ra_incl[np.random.choice(len(scrambled_ra_incl), size=n_random_inclined_events, replace=False)]
     scrambled_dec_incl = scrambled_dec_incl[np.random.choice(len(scrambled_dec_incl), size=n_random_inclined_events, replace=False)]
+
+    return scrambled_ra_vert, scrambled_dec_vert, scrambled_ra_incl, scrambled_dec_incl
+
+def do_simulation(pdf_vertical, pdf_inclined, n_events_vert, n_events_incl, ra_bins, dec_bins, seed, n_vertical_events_final, n_inclined_events_final):
+
+    # Compute CDFs
+    cdf_2d_vert = np.cumsum(np.cumsum(pdf_vertical, axis=1), axis=0)
+    cdf_2d_vert /= cdf_2d_vert[-1, -1]
+
+    cdf_2d_incl = np.cumsum(np.cumsum(pdf_inclined, axis=1), axis=0)
+    cdf_2d_incl /= cdf_2d_incl[-1, -1]
+
+    # Create dedicated random generators
+    rng_ra_vert = np.random.default_rng(seed + 100)
+    rng_dec_vert = np.random.default_rng(seed + 101)
+    rng_ra_incl = np.random.default_rng(seed + 200)
+    rng_dec_incl = np.random.default_rng(seed + 201)
+    rng_poisson_vert = np.random.default_rng(seed + 300)
+    rng_poisson_incl = np.random.default_rng(seed + 301)
+    rng_select_vert = np.random.default_rng(seed + 400)
+    rng_select_incl = np.random.default_rng(seed + 401)
+
+    # Sample RA and Dec
+    random_ra_vals = rng_ra_vert.random(n_events_vert)
+    random_dec_vals = rng_dec_vert.random(n_events_vert)
+    scrambled_ra_vert = np.interp(random_ra_vals, get_bin_centers(cdf_2d_vert.T[:, -1]), get_bin_centers(ra_bins))
+    scrambled_dec_vert = np.interp(random_dec_vals, get_bin_centers(cdf_2d_vert.T[-1, :]), get_bin_centers(dec_bins))
+
+    random_ra_vals_incl = rng_ra_incl.random(n_events_incl)
+    random_dec_vals_incl = rng_dec_incl.random(n_events_incl)
+    scrambled_ra_incl = np.interp(random_ra_vals_incl, get_bin_centers(cdf_2d_incl.T[:, -1]), get_bin_centers(ra_bins))
+    scrambled_dec_incl = np.interp(random_dec_vals_incl, get_bin_centers(cdf_2d_incl.T[-1, :]), get_bin_centers(dec_bins))
+
+    # Final selection based on Poisson
+    n_random_vertical_events = rng_poisson_vert.poisson(n_vertical_events_final)
+    indices_vert = rng_select_vert.choice(len(scrambled_ra_vert), size=n_random_vertical_events, replace=False)
+    scrambled_ra_vert = scrambled_ra_vert[indices_vert]
+    scrambled_dec_vert = scrambled_dec_vert[indices_vert]
+
+    n_random_inclined_events = rng_poisson_incl.poisson(n_inclined_events_final)
+    indices_incl = rng_select_incl.choice(len(scrambled_ra_incl), size=n_random_inclined_events, replace=False)
+    scrambled_ra_incl = scrambled_ra_incl[indices_incl]
+    scrambled_dec_incl = scrambled_dec_incl[indices_incl]
 
     return scrambled_ra_vert, scrambled_dec_vert, scrambled_ra_incl, scrambled_dec_incl

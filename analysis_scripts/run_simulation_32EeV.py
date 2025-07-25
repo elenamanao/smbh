@@ -72,14 +72,14 @@ cr_inclined = dataset[mask]
 
 # apply energy cut
 min_energy = args.min_energy_dipole
-mask_energy_vertical = cr_vertical["energy"] > min_energy
-mask_energy_inclined = cr_inclined["energy"] > min_energy
+mask_energy_vertical = cr_vertical["E"] > min_energy
+mask_energy_inclined = cr_inclined["E"] > min_energy
 cr_vertical = cr_vertical[mask_energy_vertical]
 cr_inclined = cr_inclined[mask_energy_inclined]
 
 min_energy_analysis = args.min_energy_analysis
-mask_energy_vertical_analysis = cr_vertical["energy"] > min_energy_analysis
-mask_energy_inclined_analysis = cr_inclined["energy"] > min_energy_analysis
+mask_energy_vertical_analysis = cr_vertical["E"] > min_energy_analysis
+mask_energy_inclined_analysis = cr_inclined["E"] > min_energy_analysis
 # n_vertical_events_final = len(cr_vertical[mask_energy_vertical_analysis])
 # n_inclined_events_final = len(cr_inclined[mask_energy_inclined_analysis])
 
@@ -105,8 +105,8 @@ pdf_inclined = flux_values*exposure_incl
 #define seeds (need 2 for each simulation because we don't want r.a. and dec to be correlated)
 seeds = np.arange(args.seed_initial, args.seed_final, 2)
 results_dtype = [('seed', '<i4'),
-                      ('ra',list ),
-                      ('dec',list )]
+                      ('RA',list ),
+                      ('Dec',list )]
 
 results = np.zeros(len(seeds), dtype = results_dtype)
 
@@ -132,8 +132,8 @@ for i, seed in enumerate(seeds):
     sim_dec = np.arcsin(sim_sindec)
 
     results['seed'][i] = seed
-    results['ra'][i] = sim_ra
-    results['dec'][i] = sim_dec
+    results['RA'][i] = sim_ra
+    results['Dec'][i] = sim_dec
 
 #save trials
 outfilename = f'trials_minEnergy_{min_energy_analysis}EeV_seed_in_{args.seed_initial}_seed_fin_{args.seed_final}.npy'

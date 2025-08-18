@@ -145,10 +145,14 @@ for batch in seed_batches:
                                             results['Dec'][i], 
                                             step)
 
-        seed_initial, seed_final = np.amin(events['seed']), np.amax(events['seed']) 
+        seed_initial, seed_final = np.amin(results['seed']), np.amax(results['seed']) 
 
     #save trials
-    outfilename = 'correlation_'+filter_sources+f'_initial_seed_{np.amin(batch)}_final_seed{np.amax(batch)}.npy'
+    if 'signalevents' in args.sky_map_file:
+        n_signal = args.sky_map_file.split('_')[-2]
+        outfilename = 'trials_'+filter_sources+f'_initial_seed_{seed_initial}_final_seed{seed_final}_{n_signal}_signalevents.npy'
+    else:
+        outfilename = 'correlation_'+filter_sources+f'_initial_seed_{np.amin(batch)}_final_seed{np.amax(batch)}.npy'
 
     outdir = args.outdir
 

@@ -17,9 +17,9 @@ p.add_argument("--sourcelist",
 p.add_argument("--vertical_data_path", 
                type=str, 
                help="Path to vertical data")
-p.add_argument("--inclined_data_path", 
-               type=str, 
-               help="Path to inclined data")
+# p.add_argument("--inclined_data_path", 
+#                type=str, 
+#                help="Path to inclined data")
 p.add_argument("--outdir", 
                type=str, 
                help="Path to the directory where to save the results")
@@ -66,13 +66,18 @@ elif filter_sources == 'non_AGN':
 
 n_sources_initial = len(sources)
 
-inclined_events = np.load(args.inclined_data_path, allow_pickle = True)
-vertical_events = np.load(args.vertical_data_path, allow_pickle = True)
+datContent = [i.strip().split() for i in open(args.vertical_data_path).readlines()]
 
-all_events = np.concatenate((inclined_events, vertical_events))
-print(np.amin(all_events['ra']), np.amax(all_events['ra']))
+all_events = pd.DataFrame(datContent[1:], columns=datContent[0])
+for col in datContent[0]:
+    all_events[col] = all_events[col].astype('float') 
+# inclined_events = np.load(args.inclined_data_path, allow_pickle = True)
+# vertical_events = np.load(args.vertical_data_path, allow_pickle = True)
+# all_events = vertical_events
+# all_events = np.concatenate((inclined_events, vertical_events))
+print(np.amin(all_events['RA']), np.amax(all_events['RA']))
 
-mask_energy = all_events['energy'] > 20
+mask_energy = all_events['E'] > 20
 
 all_events_analysis = all_events[mask_energy]
 print('We run the analysis using', len(all_events_analysis), 'events')
@@ -89,8 +94,8 @@ r_min, r_max, r_step = args.search_radius
 ra_true = sources.RA_deg.values #r.a. of the sources
 dec_true = sources.DEC_deg.values #dec of the sources 
 
-results_dtype = [('ra',list ),
-                 ('dec',list )]
+results_dtype = [('RA',list ),
+                 ('Dec',list )]
 
 
 steps = np.arange(r_min, r_max, r_step)
@@ -100,15 +105,15 @@ for i in steps:
 results = np.zeros(1, dtype = results_dtype)
 sources_ra_rad, sources_dec_rad = np.radians(sources['RA_deg']), np.radians(sources['DEC_deg'])
 
-results['ra'] = [all_events_analysis['ra']]
-results['dec']= [all_events_analysis['dec']]
+results['RA'] = [all_events_analysis['RA']]
+results['Dec']= [all_events_analysis['Dec']]
 
 for step in steps:
     #first case, just scramble in r.a.
     results[f'fraction_{step}'] = correlation.fraction_of_associated_events(sources_ra_rad, 
                                                 sources_dec_rad, 
-                                                np.radians(all_events_analysis['ra']), 
-                                                np.radians(all_events_analysis['dec']), 
+                                                np.radians(all_events_analysis['RA']), 
+                                                np.radians(all_events_analysis['Dec']), 
                                                 np.radians(step))
 
 #save

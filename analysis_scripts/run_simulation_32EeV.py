@@ -44,6 +44,11 @@ p.add_argument("--seed_final",
                type = int, 
                default = 100, 
                help = 'Last seed to use')
+p.add_argument('--pdf',
+               type = str,
+               default = 'dip_and_exposure',
+               help = '''to be updated
+               ''')
 p.add_argument('--mode',
                type = str,
                default = 'sample',
@@ -95,12 +100,18 @@ exposure_vert, exposure_incl, exposure_tot = auger_tools.LoadExposureMap(60, 80,
 exposure_vert_smooth = auger_tools.smooth_flux(exposure_vert, sigma = 15)
 exposure_incl_smooth = auger_tools.smooth_flux(exposure_incl, sigma = 10)
 
-#define dipole pdf
-flux_values = auger_tools.dipole_flux(ra_grid, np.arcsin(dec_grid), d,  alpha_d, delta_d)
+if args.pdf == 'dip_and_exposure':
+    #define dipole pdf
+    flux_values = auger_tools.dipole_flux(ra_grid, np.arcsin(dec_grid), d,  alpha_d, delta_d)
 
-#define final pdf
-pdf_vertical = flux_values*exposure_vert
-pdf_inclined = flux_values*exposure_incl
+    #define final pdf
+    pdf_vertical = flux_values*exposure_vert
+    pdf_inclined = flux_values*exposure_incl
+
+elif args.pdf == 'exposure_only':
+    pdf_vertical = exposure_vert
+    pdf_inclined = exposure_incl
+
 
 #define seeds (need 2 for each simulation because we don't want r.a. and dec to be correlated)
 seeds = np.arange(args.seed_initial, args.seed_final, 2)

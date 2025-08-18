@@ -57,15 +57,15 @@ def do_simulation_bigged_seed(pdf_vertical, pdf_inclined, n_events_vert, n_event
     # print(f'We simulated {n_events_vert} vertical events and {n_events_incl} inclined events, which matches the expected flux at 8 EeV.')
 
     #now we randomly sample a poissonian of the number of events above 20 EeV that we observe in our sample, and this will be our final simulation
-    np.random.seed(seed)
-    n_random_vertical_events = np.random.poisson(n_vertical_events_final)
-    scrambled_ra_vert = scrambled_ra_vert[np.random.choice(len(scrambled_ra_vert), size=n_random_vertical_events, replace=False)]
-    scrambled_dec_vert = scrambled_dec_vert[np.random.choice(len(scrambled_dec_vert), size=n_random_vertical_events, replace=False)]
+    # np.random.seed(seed)
+    # n_random_vertical_events = np.random.poisson(n_vertical_events_final)
+    # scrambled_ra_vert = scrambled_ra_vert[np.random.choice(len(scrambled_ra_vert), size=n_random_vertical_events, replace=False)]
+    # scrambled_dec_vert = scrambled_dec_vert[np.random.choice(len(scrambled_dec_vert), size=n_random_vertical_events, replace=False)]
 
-    np.random.seed(seed+1)
-    n_random_inclined_events = np.random.poisson(n_inclined_events_final)
-    scrambled_ra_incl = scrambled_ra_incl[np.random.choice(len(scrambled_ra_incl), size=n_random_inclined_events, replace=False)]
-    scrambled_dec_incl = scrambled_dec_incl[np.random.choice(len(scrambled_dec_incl), size=n_random_inclined_events, replace=False)]
+    # np.random.seed(seed+1)
+    # n_random_inclined_events = np.random.poisson(n_inclined_events_final)
+    # scrambled_ra_incl = scrambled_ra_incl#[np.random.choice(len(scrambled_ra_incl), size=n_random_inclined_events, replace=False)]
+    # scrambled_dec_incl = scrambled_dec_incl#[np.random.choice(len(scrambled_dec_incl), size=n_random_inclined_events, replace=False)]
 
     return scrambled_ra_vert, scrambled_dec_vert, scrambled_ra_incl, scrambled_dec_incl
 
@@ -100,6 +100,7 @@ def do_simulation(pdf_vertical, pdf_inclined, n_events_vert, n_events_incl, ra_b
     scrambled_dec_incl = np.interp(random_dec_vals_incl, get_bin_centers(cdf_2d_incl.T[-1, :]), get_bin_centers(dec_bins))
 
     # Final selection based on Poisson
+<<<<<<< Updated upstream
     #n_random_vertical_events = rng_poisson_vert.poisson(n_vertical_events_final)
     #indices_vert = rng_select_vert.choice(len(scrambled_ra_vert), size=n_random_vertical_events, replace=False)
     #scrambled_ra_vert = scrambled_ra_vert[indices_vert]
@@ -109,5 +110,16 @@ def do_simulation(pdf_vertical, pdf_inclined, n_events_vert, n_events_incl, ra_b
     #indices_incl = rng_select_incl.choice(len(scrambled_ra_incl), size=n_random_inclined_events, replace=False)
     #scrambled_ra_incl = scrambled_ra_incl[indices_incl]
     #scrambled_dec_incl = scrambled_dec_incl[indices_incl]
+=======
+    # n_random_vertical_events = rng_poisson_vert.poisson(n_vertical_events_final)
+    # indices_vert = rng_select_vert.choice(len(scrambled_ra_vert), size=n_random_vertical_events, replace=False)
+    # scrambled_ra_vert = scrambled_ra_vert[indices_vert]
+    # scrambled_dec_vert = scrambled_dec_vert[indices_vert]
+
+    # n_random_inclined_events = rng_poisson_incl.poisson(n_inclined_events_final)
+    # indices_incl = rng_select_incl.choice(len(scrambled_ra_incl), size=n_random_inclined_events, replace=False)
+    # scrambled_ra_incl = scrambled_ra_incl[indices_incl]
+    # scrambled_dec_incl = scrambled_dec_incl[indices_incl]
+>>>>>>> Stashed changes
 
     return scrambled_ra_vert, scrambled_dec_vert, scrambled_ra_incl, scrambled_dec_incl

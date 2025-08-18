@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import argparse
 sys.path.append('tools')
 
-from analysis_scripts.tools import statistics_utils
+from tools import statistics_utils
 
 p = argparse.ArgumentParser(description="Input parameters producing trials for correaltion analysis.")
 
@@ -44,6 +44,7 @@ steps = np.arange(args.steps[0], args.steps[1], args.steps[2])
 pretrial_pvalues = args.pvalue
 
 for f, trialfile in enumerate(trial_files):
+    print(trialfile)
     trials = np.load(trialfile, allow_pickle=True)
     #for each trial, calculate their p-value for all the cases, and see how often we get a p-value smaller than the one we have
     for i in np.arange(n):
@@ -59,12 +60,6 @@ pval_final = np.ones(n)
 for i in np.arange(n):
     pval_final[i] = np.amin([pval_distribution[f'pvalue_{f+1}'][i] for f in np.arange(len(trial_files))])
 
-
-
 trial_correction = np.sum(pval_final < pretrial_pvalues)/len(pval_final)
 
-
 print(f'The trial correction for the p-value {pretrial_pvalues} is {trial_correction}, resulting in correction factor of {trial_correction/pretrial_pvalues}')
-
-
-

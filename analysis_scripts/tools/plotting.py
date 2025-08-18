@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-from scipy.stats import norm
+from scipy.stats import norm, poisson, binom
 from scipy.optimize import curve_fit
 
 def gaussian(x, mu, sigma, A):
@@ -44,6 +44,13 @@ def fit_gaussian(trials, bins):
 
     return params, covariance
      
+def fit_poisson(trials, bins):
+    lambda_hat = int(np.median(trials)*607)
+
+    # Plot histogram and fitted Poisson PMF
+    pmf_fitted = poisson.pmf(bins, mu=lambda_hat)
+
+    return pmf_fitted
 
 def plot_gaussian_fit(params, ax, norm = False):
         x = np.linspace(0,1, 200)

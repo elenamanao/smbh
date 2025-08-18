@@ -91,8 +91,8 @@ ra_true = sources.RA_deg.values #r.a. of the sources
 dec_true = sources.DEC_deg.values #dec of the sources 
 
 results_dtype = [('seed', '<i4'),
-                      ('ra',list ),
-                      ('dec',list )]
+                      ('RA',list ),
+                      ('Dec',list )]
 
 steps = np.arange(r_min, r_max, r_step)
 for i in steps:
@@ -107,15 +107,15 @@ for batch in seed_batches:
         print(seed)
         mask = events['seed'] == seed
         results['seed'][i] = seed
-        results['ra'][i] = events['ra'][mask][0]
-        results['dec'][i] = events['dec'][mask][0]
+        results['RA'][i] = events['RA'][mask][0]
+        results['Dec'][i] = events['Dec'][mask][0]
         for step in steps:
             #first case, just scramble in r.a.
             if pao_hotspot_treatment == 'no_mask':
                 results[f'fraction_{step}'][i] = correlation.fraction_of_associated_events(sources_ra_rad, 
                                                     sources_dec_rad, 
-                                                    events['ra'][mask][0], 
-                                                    events['dec'][mask][0], 
+                                                    events['RA'][mask][0], 
+                                                    events['Dec'][mask][0], 
                                                     np.radians(step))
 
             if pao_hotspot_treatment == 'mask':
@@ -129,20 +129,20 @@ for batch in seed_batches:
                 sources = sources[check_distance_sources]
                 print(f"After cutting the sources in the PAO hotspot we are left with {len(sources)} sources.")
 
-                gcd_events = auger_tools.GreatCircleDistance(results['ra'][i], 
-                                            results['dec'][i],
-                                            np.ones_like(results['ra'][i])*pao_hotspot_ra,
-                                            np.ones_like(results['dec'][i])*pao_hotspot_dec)
+                gcd_events = auger_tools.GreatCircleDistance(results['RA'][i], 
+                                            results['Dec'][i],
+                                            np.ones_like(results['RA'][i])*pao_hotspot_ra,
+                                            np.ones_like(results['Dec'][i])*pao_hotspot_dec)
                 #remove those
                 check_distance_events = gcd_events > np.deg2rad(pao_hotspot_r)
-                results['ra'][i] = results['ra'][i][check_distance_events]
-                results['dec'][i]= results['dec'][i][check_distance_events]
+                results['RA'][i] = results['RA'][i][check_distance_events]
+                results['Dec'][i]= results['Dec'][i][check_distance_events]
                 print(f"After cutting the events in the PAO hotspot we are left with {len(results['dec'][i])} sources.")
 
                 results[f'fraction_{step}'][i] = correlation.fraction_of_associated_events(sources_ra_rad, 
                                             sources_dec_rad, 
-                                            results['ra'][i], 
-                                            results['dec'][i], 
+                                            results['RA'][i], 
+                                            results['Dec'][i], 
                                             step)
 
         seed_initial, seed_final = np.amin(events['seed']), np.amax(events['seed']) 

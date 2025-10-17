@@ -2,47 +2,15 @@ import itertools
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
-# import seaborn as sns
 
+cmap = colormaps["Paired"]
 
-# # Use this dictionary to have uniform colors between plots!
-# source_color = {
-#     'NGC1068': '#77B3D7',
-#     'NGC4151': '#e28387',
-#     'CGCG420-015': '#C01B3C',
-#     # 'NGC 6240': '#785ef0',
-#     # 'NGC 4388': 'tab:cyan',
-#     'NGC7469': '#557687',
-# }
+colors = cmap(np.linspace(0, 1, 12))
 
-# blues = ["#0C355D", "#1B5B99", "#789BC3"]
-# azures = ["#557687", "#8CC0DA", "#BAD9E9"]
-# greys = ["#42464F", "#8991A2", "#B7BCC6"]
-# reds = ["#5F0819", "#C01B3C", "#e28387"]
-# yellows = ["#87630D", "#DAA21C", "#EAC88A"]
-# shades = ["#E4E986", "#8CDB5E", "#00C8CF"]
-# all_colors = blues + azures + greys + reds + yellows
-# palette_dark = all_colors[::3]
-# palette = all_colors[1::3]
-# palette_light = all_colors[2::3]
-
-# pst_color = reds[1]
-# ana_9y_color = yellows[1]
-# ana_13y_color = blues[1]
-
-# sns.set_palette(palette)
-
-# marker_cycler = itertools.cycle(["o", "v", "^", "s", " D"])
-
-nice_colors = colormaps["tab20b"]
-
-colors = nice_colors(np.linspace(0, 1, 20))
-
-blues = colors[0:4]
-greens = colors[4:8]
-yellows = colors[8:12]
-reds = colors[12:16]
-purples = colors[16:]
+blues = ["#1B5B99", colors[1], "#789BC3"]
+greens = ['darkgreen', 'mediumseagreen' ,colors[2]]
+reds = ['firebrick', colors[5],colors[4]]
+yellows = ['goldenrod', 'gold',colors[-2]]
 
 
 settings = {

@@ -83,3 +83,34 @@ def save_associated_events(sources, data_ra, data_dec, search_radius):
     
     return evts_associated
 
+def source_with_associated_events(events_associated, sources):
+    sourcenames = np.unique(events_associated['src_name'])
+
+    N = 0
+    source = ''
+    sources_dict = {
+        'src_name': [],
+        'src_ra': [],
+        'src_dec':[],
+        'M_BH':[],
+        'n_events' : []
+    }
+    for s in sourcenames:
+        mask = events_associated['src_name'] == s
+        mask_src = sources['Input'] == s
+        sources_dict['src_name'] = np.append(sources_dict['src_name'], s)
+        sources_dict['src_ra'] = np.append( sources_dict['src_ra'], sources[mask_src].RA_deg.values)
+        sources_dict['src_dec'] = np.append( sources_dict['src_dec'], sources[mask_src].DEC_deg.values)
+        sources_dict['M_BH'] = np.append( sources_dict['M_BH'], sources[mask_src].M_BH.values)
+        sources_dict['n_events'] = np.append(sources_dict['n_events'], len(events_associated[mask]))
+        if len(events_associated[mask])> N:
+            N = len(events_associated[mask])
+            source = s
+    print('The source with the highest number of events is ', source, 'and it has', N, 'events.')
+
+    # Sort by "id" in one line
+    idx = np.argsort(sources_dict["n_events"])
+    sources_dict = {k: v[idx] for k, v in sources_dict.items()}
+
+    return sources_dict
+

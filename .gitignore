@@ -1,2 +1,3 @@
-__pycache__/
+notebooks/plots/combined_exposure_and_dipole.pdf
+notebooks/data/__pycache__/
 *.pyc
